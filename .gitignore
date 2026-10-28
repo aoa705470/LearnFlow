@@ -1,0 +1,37 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# JavaScript
+node_modules/
+.pnpm-store/
+.uv-cache/
+dist/
+coverage/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-cache-files-*/
+.mypy_cache/
+.ruff_cache/
+
+# Browser tests
+playwright-report/
+test-results/
+
+# Local data and backups
+data/
+backups/
+*.sql
+*.sql.gz
+infra/mysql-data/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

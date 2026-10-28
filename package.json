@@ -1,0 +1,45 @@
+{
+  "name": "learnflow",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": "24.16.0",
+    "pnpm": "11.19.0"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @learnflow/web dev",
+    "dev:api": "uv run --directory apps/api --project . --locked --cache-dir ../../.uv-cache python -m app.run",
+    "db:dev:up": "docker compose --env-file .env -f infra/compose.yaml --profile dev up -d --wait mysql-dev",
+    "db:dev:down": "docker compose --env-file .env -f infra/compose.yaml --profile dev stop mysql-dev",
+    "db:test:up": "docker compose --env-file .env -f infra/compose.yaml --profile test up -d --wait mysql-test",
+    "db:test:down": "docker compose --env-file .env -f infra/compose.yaml --profile test stop mysql-test",
+    "db:migrate": "uv run --project apps/api --locked --cache-dir .uv-cache alembic -c apps/api/alembic.ini upgrade head",
+    "lint": "pnpm --filter @learnflow/web lint",
+    "lint:api": "uv run --project apps/api --locked --cache-dir .uv-cache ruff check apps/api",
+    "format": "prettier --write apps packages infra .github package.json pnpm-workspace.yaml eslint.config.js prettier.config.js README.md",
+    "format:check": "prettier --check apps packages infra .github package.json pnpm-workspace.yaml eslint.config.js prettier.config.js README.md",
+    "format:api": "uv run --project apps/api --locked --cache-dir .uv-cache ruff format apps/api",
+    "format:api:check": "uv run --project apps/api --locked --cache-dir .uv-cache ruff format --check apps/api",
+    "typecheck": "pnpm --filter @learnflow/web typecheck",
+    "typecheck:api": "uv run --project apps/api --locked --cache-dir .uv-cache mypy apps/api/app",
+    "build": "pnpm --filter @learnflow/web build",
+    "test:unit": "pnpm --filter @learnflow/web test:unit",
+    "test:api": "uv run --project apps/api --locked --cache-dir .uv-cache pytest apps/api/tests",
+    "test:e2e": "pnpm --filter @learnflow/web test:e2e",
+    "check:web": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:unit && pnpm build",
+    "check:api": "pnpm lint:api && pnpm format:api:check && pnpm typecheck:api && pnpm test:api"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@hey-api/openapi-ts": "0.99.0",
+    "@playwright/test": "1.64.1",
+    "eslint": "10.13.0",
+    "eslint-plugin-vue": "10.12.0",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "shadcn-vue": "2.8.2",
+    "typescript-eslint": "8.72.1",
+    "vue-eslint-parser": "10.4.1"
+  }
+}

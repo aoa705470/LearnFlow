@@ -1,0 +1,11 @@
+pnpm-lock.yaml
+apps/web/dist/
+apps/web/playwright-report/
+apps/web/test-results/
+apps/api/.venv/
+apps/api/.pytest_cache/
+apps/api/.ruff_cache/
+apps/api/.mypy_cache/
+apps/api/.uv-cache/
+apps/api/**/__pycache__/
+packages/api-client/src/generated/

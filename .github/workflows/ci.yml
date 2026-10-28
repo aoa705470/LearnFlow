@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+
+  api:
+    name: API and MySQL checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4.13@sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69
+        env:
+          MYSQL_DATABASE: learnflow_test
+          MYSQL_USER: learnflow_test
+          MYSQL_PASSWORD: learnflow_test_ci
+          MYSQL_ROOT_PASSWORD: learnflow_root_ci
+          TZ: UTC
+        ports:
+          - 3308:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -plearnflow_root_ci --silent"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+    env:
+      APP_ENV: development
+      API_HOST: 127.0.0.1
+      API_PORT: '8000'
+      DATABASE_URL: mysql+pymysql://learnflow_test:learnflow_test_ci@127.0.0.1:3308/learnflow_test?charset=utf8mb4
+      TEST_DATABASE_URL: mysql+pymysql://learnflow_test:learnflow_test_ci@127.0.0.1:3308/learnflow_test?charset=utf8mb4
+      RUN_MYSQL_TESTS: '1'
+      ALLOWED_HOSTS: '["127.0.0.1:5173","127.0.0.1:8000"]'
+      ALLOWED_ORIGINS: '["http://127.0.0.1:5173","http://127.0.0.1:8000"]'
+      DB_POOL_SIZE: '5'
+      DB_MAX_OVERFLOW: '5'
+      DB_POOL_TIMEOUT_SECONDS: '10'
+      DB_POOL_RECYCLE_SECONDS: '1800'
+      DB_CONNECT_TIMEOUT_SECONDS: '5'
+      DB_READ_TIMEOUT_SECONDS: '30'
+      DB_WRITE_TIMEOUT_SECONDS: '30'
+      DB_LOCK_WAIT_TIMEOUT_SECONDS: '5'
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: 3.13.14
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: 0.11.29
+          enable-cache: true
+          cache-dependency-glob: apps/api/uv.lock
+      - run: uv sync --locked
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked ruff check .
+      - run: uv run --locked mypy app
+      - run: uv run --locked alembic upgrade head
+      - run: uv run --locked pytest
+
+# Contract generation is introduced by T029. Business API and full journey E2E
+# checks are added with their owning tasks; this scaffold does not fake them.

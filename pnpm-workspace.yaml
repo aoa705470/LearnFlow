@@ -1,0 +1,11 @@
+packages:
+  - apps/web
+  - packages/*
+
+allowBuilds:
+  vue-demi: true
+
+confirmModulesPurge: false
+
+minimumReleaseAgeExclude:
+  - '@lucide/vue@1.62.0'
