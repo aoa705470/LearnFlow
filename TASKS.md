@@ -554,7 +554,7 @@ production仅指现有规格中的本机单用户交付，不扩展公网/多用
 
 - [ ] **Q07 性能数据与可重复种子的最终形态**：READY中的数据规模/平均正文分布标为建议；M1结束至M2开始前冻结采用情况、生成方式和实际规模，不把建议当成业务容量限制；既定性能阈值不得自行改变。关联任务：T067、T083。
 
-- [x] **Q08 CI 执行平台与运行器**：2026-10-28用户确认采用GitHub Actions；Runner固定`ubuntu-24.04`，API job使用独立MySQL 8.4.13 service、宿主端口3308与`learnflow_test`库，Web/API job不共享可清理数据库。工作流已本地解析并执行等价检查，托管Runner首轮结果须待提交推送后观察。证据：[阶段 1 工程脚手架与验证记录](docs/engineering/phase-1-scaffold.md)。关联任务：T013、T100。
+- [x] **Q08 CI 执行平台与运行器**：2026-10-28用户确认采用GitHub Actions；Runner固定`ubuntu-24.04`，API job使用独立MySQL 8.4.13 service、宿主端口3308与`learnflow_test`库，Web/API job不共享可清理数据库。首次托管运行发现并修复跨平台mypy诊断差异，第二次运行[40630376539](https://github.com/aoa705470/LearnFlow/actions/runs/40630376539)的Web与API/MySQL两个job全部通过。证据：[阶段 1 工程脚手架与验证记录](docs/engineering/phase-1-scaffold.md)。关联任务：T013、T100。
 
 ## 验收追踪与阶段出口
 

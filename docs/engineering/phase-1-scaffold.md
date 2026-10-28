@@ -32,7 +32,7 @@ Q08 已由用户确认采用 GitHub Actions：
 - workflow 使用最小 `contents: read` 权限；uv setup action 固定到提交 SHA。
 - T029 的 OpenAPI 客户端生成/漂移检查、后续业务契约和完整学习旅程 E2E 尚未具备，workflow 明确记录而不放空脚本。
 
-本机已解析并格式化 workflow YAML，并执行其当前能力对应的命令；仓库未推送，因此没有声称 GitHub 托管 Runner 已实际运行通过。
+GitHub 托管验证记录：首次运行 [40630150592](https://github.com/aoa705470/LearnFlow/actions/runs/40630150592) 暴露了 Pydantic mypy 插件在 Windows 与 Ubuntu 对 `BaseSettings()` 构造签名判断不同的问题；Web job 通过，API job 在 mypy 停止。修正为精确兼容两个平台的诊断后，第二次运行 [40630376539](https://github.com/aoa705470/LearnFlow/actions/runs/40630376539) 的 Web 与 API/MySQL 两个 job 全部通过。
 
 ## 4. 2026-10-28 实际验证
 
@@ -48,6 +48,7 @@ Q08 已由用户确认采用 GitHub Actions：
 | `pnpm db:migrate` | 通过；连接真实开发 MySQL，当前无业务迁移，Alembic 报告 MySQL 非事务 DDL 语义 |
 | `pnpm dev:api` | 通过；配置驱动监听 `127.0.0.1:8000`，`GET /openapi.json` 返回 200 |
 | `pnpm dev:web` 与代理 | 通过；`127.0.0.1:5173` 返回首页；`/api/not-found` 由 Uvicorn 返回 JSON 404，证明代理链路可达 |
+| GitHub Actions 托管 Runner | 通过；run 40630376539，Web 50 秒、API/MySQL 57 秒，全部步骤成功 |
 
 验证结束后 Uvicorn、Vite 与两个 MySQL 容器均已停止；MySQL 命名卷按要求保留，未写入示例学习数据。
 
@@ -56,4 +57,4 @@ Q08 已由用户确认采用 GitHub Actions：
 - Host/Origin/CORS 的实际请求拦截属于 T025；本阶段只校验配置并保持 Vite 原始 Host。
 - SQLAlchemy Engine/Session、模型和首个迁移属于 T014 以后；当前 Alembic 只有可运行入口。
 - 健康端点、初始化设置、真实业务读写和生产容器入口属于后续任务。
-- GitHub Actions 托管执行需在提交并推送 workflow 后观察首轮结果。
+- 后续业务任务新增的契约、迁移或 E2E 检查仍需通过新的托管 CI 运行验证，不能沿用本次绿色结果代替。
