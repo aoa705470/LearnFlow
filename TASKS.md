@@ -95,6 +95,7 @@ FIGMA 的 accessibilitySync 记录已完成配色同步和代表截图复核，�
 - [x] **T010 建立隔离的测试基础设施**
   - 依赖：T006、T007、T008。需求/验收：LF-10 / AC-15。参考：DEV §9/10；ARCH §11；DB §9。
   - 完成条件：pytest、Vitest/Vue Test Utils、Playwright 及浏览器依赖可运行；测试工厂、固定时钟、独立测试数据库配置与清理保护具备，不依赖生产记录或固定 Figma ID。
+  - 补充验证（2026-10-28）：测试启动先验证 `TEST_DATABASE_URL` 的回环地址、3308 端口与 `learnflow_test` 库名，再强制覆盖应用读取的 `DATABASE_URL`；危险的既有开发/生产 URL 不再优先。回归测试与真实隔离 MySQL 测试通过。
 
 - [x] **T011 提供开发/测试 MySQL Compose 环境**
   - 依赖：T008。需求/验收：LF-10 / AC-14 / DB-01。参考：ARCH §10；DB §2/8；DEV §2。
@@ -103,6 +104,7 @@ FIGMA 的 accessibilitySync 记录已完成配色同步和代表截图复核，�
 - [x] **T012 建立开发启动入口与 Vite API 代理**
   - 依赖：T008、T011。需求/验收：LF-10 / FR-03 / RD-25。参考：API §1.1；DEV §2.3/10；ARCH §10。
   - 完成条件：前后端和数据库可按说明启动；Vite 转发 /api 并保留含端口 Host，Uvicorn 只绑定本机；代理目标及直连入口与允许列表配置一致，不依赖 Nginx；实际 Host/Origin 校验由后续安全任务实现并验证，此项不冒充安全验收。
+  - 补充验证（2026-10-28）：development 配置只接受基线确定的 `API_HOST=127.0.0.1`；`0.0.0.0`、局域网地址、`localhost` 与 `::1` 均由配置校验拒绝。production 容器监听仍留给 T095，不提前实现 T025 的请求边界。
 
 - [x] **T013 建立可逐步扩充的 CI 骨架**
   - 依赖：T009、T010、T011。需求/验收：LF-10 / AC-15。参考：DEV §10/11；ARCH §11。

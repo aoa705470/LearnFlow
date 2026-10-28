@@ -2,11 +2,12 @@ import os
 
 import pytest
 
+from tests.database_safety import configure_isolated_test_database
+
 SAFE_SETTINGS = {
     "APP_ENV": "development",
     "API_HOST": "127.0.0.1",
     "API_PORT": "8000",
-    "DATABASE_URL": "mysql+pymysql://test:test@127.0.0.1:3308/learnflow_test?charset=utf8mb4",
     "ALLOWED_HOSTS": '["127.0.0.1:5173","127.0.0.1:8000"]',
     "ALLOWED_ORIGINS": '["http://127.0.0.1:5173","http://127.0.0.1:8000"]',
     "DB_POOL_SIZE": "5",
@@ -20,11 +21,15 @@ SAFE_SETTINGS = {
 }
 
 for name, value in SAFE_SETTINGS.items():
-    os.environ.setdefault(name, value)
+    os.environ[name] = value
+
+configure_isolated_test_database(os.environ)
 
 
 @pytest.fixture
 def settings_environment(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
     for name, value in SAFE_SETTINGS.items():
         monkeypatch.setenv(name, value)
-    return SAFE_SETTINGS.copy()
+    database_url = os.environ["TEST_DATABASE_URL"]
+    monkeypatch.setenv("DATABASE_URL", database_url)
+    return {**SAFE_SETTINGS, "DATABASE_URL": database_url}

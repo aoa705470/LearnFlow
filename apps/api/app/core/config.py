@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
@@ -33,6 +33,13 @@ class Settings(BaseSettings):
         validation_alias="DB_LOCK_WAIT_TIMEOUT_SECONDS",
         ge=1,
     )
+
+    @field_validator("api_host")
+    @classmethod
+    def require_development_loopback_host(cls, value: str, info: ValidationInfo) -> str:
+        if info.data.get("app_env") == "development" and value != "127.0.0.1":
+            raise ValueError("development API_HOST must be 127.0.0.1")
+        return value
 
 
 @lru_cache

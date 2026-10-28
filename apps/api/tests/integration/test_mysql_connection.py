@@ -2,18 +2,9 @@ import os
 
 import pytest
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import make_url
 from sqlalchemy.pool import NullPool
 
-
-def require_isolated_test_database(database_url: str) -> None:
-    url = make_url(database_url)
-    if url.host not in {"127.0.0.1", "localhost"}:
-        raise RuntimeError("MySQL tests only allow a loopback database host.")
-    if url.port != 3308:
-        raise RuntimeError("MySQL tests require the isolated port 3308.")
-    if url.database != "learnflow_test":
-        raise RuntimeError("MySQL tests require the learnflow_test database.")
+from tests.database_safety import require_isolated_test_database
 
 
 @pytest.mark.mysql
@@ -43,16 +34,3 @@ def test_mysql_test_instance_has_expected_session_settings() -> None:
     assert row["charset"] == "utf8mb4"
     assert row["collation"] == "utf8mb4_0900_ai_ci"
     assert str(row["utc_offset"]) == "0:00:00"
-
-
-@pytest.mark.parametrize(
-    "database_url",
-    [
-        "mysql+pymysql://user:password@127.0.0.1:3307/learnflow_test",
-        "mysql+pymysql://user:password@127.0.0.1:3308/learnflow_dev",
-        "mysql+pymysql://user:password@example.com:3308/learnflow_test",
-    ],
-)
-def test_mysql_guard_rejects_unsafe_database_urls(database_url: str) -> None:
-    with pytest.raises(RuntimeError):
-        require_isolated_test_database(database_url)

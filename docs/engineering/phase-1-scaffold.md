@@ -19,7 +19,8 @@
 - Vitest 只收集 `src/**/*.test.ts`，不会误收集 Playwright 文件。
 - Playwright 使用锁定版本 Chromium 执行最小首页冒烟测试。
 - pytest 提供固定时钟、配置失败测试和真实 MySQL 集成入口。
-- MySQL 集成测试需显式 `RUN_MYSQL_TESTS=1`，并在连接前拒绝非回环主机、非 3308 端口或非 `learnflow_test` 库名。
+- 测试启动以已验证的 `TEST_DATABASE_URL` 强制覆盖应用 `DATABASE_URL`；既有开发/生产 URL 不能绕过隔离。MySQL 集成测试需显式 `RUN_MYSQL_TESTS=1`，并在连接前拒绝非回环主机、非 3308 端口或非 `learnflow_test` 库名。
+- development 配置只允许基线确定的 `API_HOST=127.0.0.1`，避免环境覆盖使 Uvicorn 监听局域网或全部接口；production 容器入口仍由后续任务单独实现。
 - 集成检查确认 MySQL 8.4、`utf8mb4`、`utf8mb4_0900_ai_ci` 与 UTC 有效偏移。
 
 ## 3. CI 决定与边界
@@ -41,8 +42,9 @@ GitHub 托管验证记录：首次运行 [40630150592](https://github.com/aoa705
 | `pnpm install --frozen-lockfile` | 通过；631 个锁文件条目通过供应链策略检查 |
 | `uv sync --project apps/api --locked` | 通过；Python 3.13.14 独立环境按 `uv.lock` 同步 |
 | `pnpm check:web` | 通过；ESLint、Prettier、vue-tsc、Vitest 1 项、Vite production build 均成功 |
-| `pnpm check:api` | 通过；Ruff format/lint、mypy strict 成功；无 MySQL 模式 8 passed、1 skipped |
-| 隔离 MySQL pytest | 通过；真实测试实例 9 passed |
+| `pnpm check:api` | 通过；Ruff format/lint、mypy strict 成功；无 MySQL 模式 13 passed、1 skipped |
+| 隔离 MySQL pytest | 通过；真实测试实例 14 passed，测试应用 URL 强制指向验证后的测试库 |
+| 危险配置回归 | 通过；既有生产/开发 `DATABASE_URL` 被隔离测试 URL 覆盖，development 的非 `127.0.0.1` 监听地址被拒绝 |
 | `pnpm test:e2e` | 通过；Chromium 1 passed |
 | Compose 配置与健康检查 | 通过；开发 3307、测试 3308 均仅绑定 `127.0.0.1`，两个实例进入 healthy |
 | `pnpm db:migrate` | 通过；连接真实开发 MySQL，当前无业务迁移，Alembic 报告 MySQL 非事务 DDL 语义 |
