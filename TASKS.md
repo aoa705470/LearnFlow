@@ -119,7 +119,7 @@ FIGMA 的 accessibilitySync 记录已完成配色同步和代表截图复核，�
 - [x] **T014 实现 Engine、请求 Session 与时间存储适配**
   - 依赖：T007、T011。需求/验收：LF-01～LF-08 / AC-08 / DB-11。参考：DB §2/7；ARCH §2/6/7；DEV §7。
   - 完成条件：每请求独立 Session，不跨并发共享；UUID 字符集/比较规则一致；UTC-aware Python 时间与 DATETIME(6) 双向适配、版本 BIGINT、DATE 与文本容量正确，无静默截断。
-  - 验证记录（2026-10-28）：`pnpm check:api` 通过；两个同步并发请求取得独立 Session；隔离 MySQL 8.4.13 全套 20 passed，UUID、UTC 微秒时间、无符号 BIGINT 最大值、DATE、10,000/200,000 字符文本精确往返；Alembic 当前 head 通过。详情见[阶段 2 数据基础与验证记录](docs/engineering/phase-2-data-foundation.md)。
+  - 验证记录（2026-10-28）：`pnpm check:api` 通过；两个同步并发请求取得独立 Session；隔离 MySQL 8.4.13 全套 20 passed，UUID、UTC 微秒时间、无符号 BIGINT 最大值、DATE、10,000/200,000 字符文本精确往返；Alembic 当前 head 通过；实现提交 `abca68c` 的 GitHub Actions [运行 40668638618](https://github.com/aoa705470/LearnFlow/actions/runs/40668638618) 中 Web 与 API/MySQL job 均通过。详情见[阶段 2 数据基础与验证记录](docs/engineering/phase-2-data-foundation.md)。
 
 - [ ] **T015 创建 settings/topics 模型与迁移**
   - 依赖：T014。需求/验收：LF-01/08 / DB-01/02。参考：DB §4.1/4.2/8.1。
