@@ -1,8 +1,15 @@
 import os
+from collections.abc import Iterator
 
 import pytest
+from sqlalchemy.engine import Engine
 
-from tests.database_safety import configure_isolated_test_database
+from app.core.config import Settings
+from app.db.engine import create_database_engine
+from tests.database_safety import (
+    configure_isolated_test_database,
+    require_isolated_test_database,
+)
 
 SAFE_SETTINGS = {
     "APP_ENV": "development",
@@ -33,3 +40,17 @@ def settings_environment(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
     database_url = os.environ["TEST_DATABASE_URL"]
     monkeypatch.setenv("DATABASE_URL", database_url)
     return {**SAFE_SETTINGS, "DATABASE_URL": database_url}
+
+
+@pytest.fixture
+def mysql_engine() -> Iterator[Engine]:
+    if os.getenv("RUN_MYSQL_TESTS") != "1":
+        pytest.skip("Set RUN_MYSQL_TESTS=1 to run the isolated MySQL test.")
+
+    database_url = os.environ["DATABASE_URL"]
+    require_isolated_test_database(database_url)
+    database_engine = create_database_engine(Settings(_env_file=None))
+    try:
+        yield database_engine
+    finally:
+        database_engine.dispose()
